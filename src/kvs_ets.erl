@@ -26,19 +26,20 @@
 
 
 open(Name, Options) ->
+  %% 获取参数
   Persistence = proplists:get_value(persistence, Options, false),
   KeyEncoding = proplists:get_value(key_encoding, Options, term),
   ValueEncoding = proplists:get_value(value_encoding, Options, term),
   EtsName = format_table_name(Name, ets),
+  %% 初始化ets
   Ets = case Persistence of
-          false ->
-            ets:new(EtsName, [set, public, named_table]);
-          _ ->
-            DetsName = format_table_name(Name, dets),
-            {ok, DetsRef} = dets:open_file(DetsName),
-            EstTemp = ets:new(EtsName, [set, public, named_table]),
-            dets:to_ets(DetsRef, EstTemp)
+    false -> ets:new(EtsName, [set, public, named_table]);
+     _    -> DetsName = format_table_name(Name, dets),
+             {ok, DetsRef} = dets:open_file(DetsName),
+             EstTemp = ets:new(EtsName, [set, public, named_table]),
+             dets:to_ets(DetsRef, EstTemp)
   end,
+  %% 返回存储引擎
   {ok, #engine{
     name = Name,
     mod = ?MODULE,
@@ -50,7 +51,7 @@ open(Name, Options) ->
 close(#engine{ref = Ref, name = Name}) ->
   persistence(#engine{ref = Ref, name = Name}),
   true = ets:delete(Ref),
-  catch dets:close(format_table_name(Name, dets)),
+  dets:close(format_table_name(Name, dets)),
   ok.
 
 %%  数据完全删除
@@ -64,8 +65,8 @@ contains(#engine{ref = Ref}, Key) ->
 
 get(#engine{ref = Ref, key_enc = Ke, val_enc = Ve}, Key) ->
   case ets:lookup(Ref, enc(key, Key, Ke)) of
-    []              -> {error, not_found};
-    [{_, Value}]  -> dec(value, Value, Ve)
+    []           -> {error, not_found};
+    [{_, Value}] -> dec(value, Value, Ve)
   end.
 
 %% @doc If there already exists an object with a key matching the key of the given object,
@@ -84,8 +85,8 @@ clear_all(#engine{ref = Ref}) ->
 
 is_empty(#engine{ref = Ref}) ->
   case ets:info(Ref, size) of
-    undefined   -> true;
-    Size        -> Size =:= 0
+    undefined  -> true;
+    Size       -> Size =:= 0
   end.
 
 persistence(#engine{ref = Ref, name = Name}) ->

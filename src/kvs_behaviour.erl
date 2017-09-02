@@ -17,16 +17,16 @@
 -callback destroy(Engine :: engine()) ->
     ok | {error, Reason :: any()}.
 
--callback contains(Engine :: engine(), Key :: binary()) ->
+-callback contains(Engine :: engine(), Key :: term()) ->
     true | false.
 
--callback get(Engine :: engine(), Key :: binary()) ->
+-callback get(Engine :: engine(), Key :: term()) ->
     {ok, Value :: any()} | {error, Reason :: any()}.
 
--callback put(Engine :: engine(), Key :: binary(), Value :: any()) ->
+-callback put(Engine :: engine(), Key :: term(), Value :: any()) ->
     ok | {error, Reason :: any()}.
 
--callback clear(Engine :: engine(), Key :: binary()) ->
+-callback clear(Engine :: engine(), Key :: term()) ->
     ok | {error, Reason :: any()}.
 
 -callback clear_all(Engine :: engine()) ->
